@@ -5,21 +5,34 @@ import AddIncome from './components/AddIncome';
 import AddExpense from './components/AddExpense';
 import MonthlySummary from './components/MonthlySummary';
 import Settings from './components/Settings';
+import { getMonthlyMetrics } from './utils/calculations';
 
 function App() {
   const [incomes,setIncomes]=useState([]);
   const [expenses,setExpenses]=useState([]);
   const [savingsTarget,setSavingsTarget]=useState(0);
+  const monthlyMetrics = getMonthlyMetrics(incomes,expenses,savingsTarget);
 
   //loads data from localStorage on start
   useEffect (() =>{
-    const storedIncomes=JSON.parse(localStorage.getItem("incomes")) || [];
-    const storedExpenses=JSON.parse(localStorage.getItem("expenses")) || [];
-    const storedTarget=JSON.parse(localStorage.getItem("savingsTarget")) || 0;
+    try {
+      const storedIncomes = JSON.parse(localStorage.getItem("incomes") || "[]");
+      const storedExpenses = JSON.parse(localStorage.getItem("expenses") || "[]");
+      const storedTarget = JSON.parse(localStorage.getItem("savingsTarget") || "0");
 
-    setIncomes(storedIncomes);
-    setExpenses(storedExpenses);
-    setSavingsTarget(storedTarget);
+      setIncomes(Array.isArray(storedIncomes) ? storedIncomes : []);
+      setExpenses(Array.isArray(storedExpenses) ? storedExpenses : []);
+      setSavingsTarget(typeof storedTarget === 'number' ? storedTarget : 0);
+    } catch (error) {
+      console.error("Error loading data from localStorage:", error);
+      setIncomes([]);
+      setExpenses([]);
+      setSavingsTarget(0);
+      // Clear corrupted data
+      localStorage.removeItem("incomes");
+      localStorage.removeItem("expenses");
+      localStorage.removeItem("savingsTarget");
+    }
   }, []);
 
   //save to localStorage whenever data changes
@@ -43,7 +56,7 @@ useEffect(() => {
         path='/'
         element={
         <Dashboard 
-          incomes={incomes}
+              incomes={incomes}
           expenses={expenses}
           savingsTarget={savingsTarget}
         />

@@ -1,5 +1,6 @@
 import {useState} from "react";
 import { Link ,useNavigate} from "react-router-dom";
+import '../App.css';
 
 export default function AddIncome({incomes,setIncomes}) {
     const [amount,setAmount]=useState("");
@@ -7,6 +8,11 @@ export default function AddIncome({incomes,setIncomes}) {
 
     function handleSubmit (e){
         e.preventDefault ();
+
+        if (!amount || Number(amount) <= 0) {
+            alert("Please enter a valid amount");
+            return;
+        }
 
         setIncomes([
             ...incomes,
@@ -20,19 +26,32 @@ export default function AddIncome({incomes,setIncomes}) {
     }
     return (
         <div>
-            <Link to="/">_Back</Link>
-            <h2>Add Income</h2>
+            <header>
+                <Link to="/" className="back-link" style={{marginBottom: 0}}>Back</Link>
+                <h2 style={{marginBottom: 0}}>Add Income</h2>
+                <div></div>
+            </header>
 
-            <form onSubmit ={handleSubmit}>
-                <input 
-                type="number"
-                placeholder="Amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required   
-                />
-                <button type="submit" >Save Income</button>
-            </form>              
+            <div className="container">
+                <div className="form-container">
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="amount">Income Amount (KES)</label>
+                            <input 
+                            id="amount"
+                            type="number"
+                            placeholder="Enter amount"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            step="0.01"
+                            min="0"
+                            required   
+                            />
+                        </div>
+                        <button type="submit" className="btn-success">Save Income</button>
+                    </form>
+                </div>
+            </div>
         </div>
     );
 }

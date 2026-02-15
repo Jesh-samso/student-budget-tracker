@@ -58,3 +58,16 @@ export function formatKES(amount) {
     return `KES ${Number(amount).toLocaleString()}`;
 }
 
+export function getMonthlyMetrics (incomes,expenses,savingsTarget){
+    const income =getMonthlyIncome(incomes);
+    const expensesTotal=getMonthlyExpenses(expenses);
+    const balance=income - expensesTotal;
+    const savings=getSavingsStatus(incomes,expenses,savingsTarget);
+
+    return {
+        income,
+        expenses:expensesTotal,
+        balance,
+        savings
+    };
+}
