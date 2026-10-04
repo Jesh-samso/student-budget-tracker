@@ -5,6 +5,8 @@ import '../App.css';
 export default function AddExpense({ expenses, setExpenses }) {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
+  const [title, setTitle] = useState("");
+  const [note, setNote] = useState("");
   const navigate = useNavigate();
 
   function handleSubmit(e) {
@@ -20,7 +22,9 @@ export default function AddExpense({ expenses, setExpenses }) {
       {
         id: Date.now(),
         amount: Number(amount),
-        category,  
+        category,
+        title: title.trim() || category,
+        note: note.trim(),
         date: new Date().toISOString(),
       },
     ]);
@@ -54,6 +58,17 @@ export default function AddExpense({ expenses, setExpenses }) {
             </div>
 
             <div className="form-group">
+              <label htmlFor="title">Expense Name</label>
+              <input
+                id="title"
+                type="text"
+                placeholder="Groceries, transport pass, rent..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
               <label htmlFor="category">Category</label>
               <select
                 id="category"
@@ -66,6 +81,17 @@ export default function AddExpense({ expenses, setExpenses }) {
                 <option>🎬 Entertainment</option>
                 <option>📦 Other</option>
               </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="note">Notes (optional)</label>
+              <input
+                id="note"
+                type="text"
+                placeholder="Add a short detail about this expense"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
             </div>
 
             <button type="submit" className="btn-danger">Save Expense</button>

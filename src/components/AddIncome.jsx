@@ -4,6 +4,8 @@ import '../App.css';
 
 export default function AddIncome({incomes,setIncomes}) {
     const [amount,setAmount]=useState("");
+    const [source,setSource]=useState("Salary");
+    const [note,setNote]=useState("");
     const navigate =useNavigate();
 
     function handleSubmit (e){
@@ -19,6 +21,8 @@ export default function AddIncome({incomes,setIncomes}) {
             {
                 id:Date.now (),
                 amount:Number(amount),
+                source,
+                note: note.trim(),
                 date:new Date().toISOString(),
             }
         ]);
@@ -48,6 +52,33 @@ export default function AddIncome({incomes,setIncomes}) {
                             required   
                             />
                         </div>
+
+                        <div className="form-group">
+                            <label htmlFor="source">Income Source</label>
+                            <select
+                                id="source"
+                                value={source}
+                                onChange={(e) => setSource(e.target.value)}
+                            >
+                                <option value="Salary">Salary</option>
+                                <option value="Allowance">Allowance</option>
+                                <option value="Freelance">Freelance</option>
+                                <option value="Gift">Gift</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="note">Note (optional)</label>
+                            <input
+                                id="note"
+                                type="text"
+                                placeholder="Add a short note about this income"
+                                value={note}
+                                onChange={(e) => setNote(e.target.value)}
+                            />
+                        </div>
+
                         <button type="submit" className="btn-success">Save Income</button>
                     </form>
                 </div>
