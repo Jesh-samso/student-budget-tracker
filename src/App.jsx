@@ -6,10 +6,36 @@ import AddExpense from './components/AddExpense';
 import MonthlySummary from './components/MonthlySummary';
 import Settings from './components/Settings';
 
+const DEFAULT_EXPENSE_CATEGORIES = [
+  'Food',
+  'Transport',
+  'Rent',
+  'Entertainment',
+  'Health',
+  'Education',
+  'Personal care',
+  'Utilities',
+  'Books & supplies',
+  'Subscriptions',
+  'Other'
+];
+
 function App() {
   const [incomes, setIncomes] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [savingsTarget, setSavingsTarget] = useState(0);
+  const [expenseCategories, setExpenseCategories] = useState(() => {
+    try {
+      const storedCategories = JSON.parse(localStorage.getItem('expenseCategories') || 'null');
+      const validCategories = Array.isArray(storedCategories)
+        ? storedCategories.filter((category) => typeof category === 'string' && category.trim())
+        : [];
+
+      return [...new Set([...DEFAULT_EXPENSE_CATEGORIES, ...validCategories])];
+    } catch {
+      return DEFAULT_EXPENSE_CATEGORIES;
+    }
+  });
   const [darkMode, setDarkMode] = useState(() => {
     try {
       return localStorage.getItem('budgetTheme') === 'dark';
@@ -58,6 +84,10 @@ function App() {
     localStorage.setItem('savingsTarget', JSON.stringify(savingsTarget));
   }, [savingsTarget]);
 
+  useEffect(() => {
+    localStorage.setItem('expenseCategories', JSON.stringify(expenseCategories));
+  }, [expenseCategories]);
+
   const removeIncome = (id) => {
     setIncomes((currentIncomes) => currentIncomes.filter((item) => item.id !== id));
   };
@@ -87,12 +117,18 @@ function App() {
 
           <Route
             path='/add-income'
-            element={<AddIncome incomes={incomes} setIncomes={setIncomes} />}
+            element={<AddIncome setIncomes={setIncomes} />}
           />
 
           <Route
             path='/add-expense'
-            element={<AddExpense expenses={expenses} setExpenses={setExpenses} />}
+            element={
+              <AddExpense
+                setExpenses={setExpenses}
+                expenseCategories={expenseCategories}
+                setExpenseCategories={setExpenseCategories}
+              />
+            }
           />
 
           <Route

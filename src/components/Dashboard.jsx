@@ -36,6 +36,18 @@ export default function Dashboard({
         ...trendData.map((item) => Math.max(item.income, item.expenses)),
         1
     );
+    const categoryChartColors = ['#0f766e', '#ea580c', '#2563eb', '#ca8a04', '#be123c', '#4f46e5', '#0891b2'];
+    const categoryChartGradient = expenseBreakdown.reduce((chart, entry, index) => {
+        const end = chart.progress + entry.percentageOfExpenses;
+
+        return {
+            progress: end,
+            stops: [
+                ...chart.stops,
+                `${categoryChartColors[index % categoryChartColors.length]} ${chart.progress}% ${end}%`
+            ]
+        };
+    }, { progress: 0, stops: [] }).stops.join(', ');
     const recentTransactions = [
         ...incomes.map((item) => ({
             ...item,
@@ -199,20 +211,31 @@ export default function Dashboard({
                         <span>Last 6 months</span>
                     </div>
 
-                    <div className="trend-chart">
+                    <div className="trend-legend" aria-label="Chart legend">
+                        <span><i className="trend-key income-key" /> Income</span>
+                        <span><i className="trend-key expense-key" /> Expenses</span>
+                    </div>
+
+                    <div className="trend-chart" aria-label="Monthly income and expenses comparison">
                         {trendData.map((item) => (
-                            <div className="trend-column" key={item.label}>
-                                <div className="trend-bars">
-                                    <div
-                                        className="trend-bar income-bar"
-                                        style={{ height: `${Math.max((item.income / peakTrendValue) * 100, item.income > 0 ? 10 : 0)}%` }}
-                                    />
-                                    <div
-                                        className="trend-bar expense-bar"
-                                        style={{ height: `${Math.max((item.expenses / peakTrendValue) * 100, item.expenses > 0 ? 10 : 0)}%` }}
-                                    />
-                                </div>
+                            <div className="trend-row" key={`${item.label}-${item.income}-${item.expenses}`}>
                                 <span className="trend-label">{item.label}</span>
+                                <div className="trend-row-bars">
+                                    <div className="trend-track">
+                                        <div
+                                            className="trend-bar income-bar"
+                                            style={{ width: `${(item.income / peakTrendValue) * 100}%` }}
+                                        />
+                                    </div>
+                                    <span className="trend-value">{formatKES(item.income)}</span>
+                                    <div className="trend-track">
+                                        <div
+                                            className="trend-bar expense-bar"
+                                            style={{ width: `${(item.expenses / peakTrendValue) * 100}%` }}
+                                        />
+                                    </div>
+                                    <span className="trend-value">{formatKES(item.expenses)}</span>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -316,38 +339,42 @@ export default function Dashboard({
                             No expenses recorded for this month yet. Add an expense to see a detailed spending breakdown.
                         </div>
                     ) : (
-                        <div className="breakdown-list">
-                            {expenseBreakdown.map((entry) => (
-                                <div className="breakdown-item" key={entry.category}>
-                                    <div className="breakdown-header">
-                                        <div className="breakdown-label-group">
-                                            <span className="breakdown-category">{entry.category}</span>
-                                            <span className="breakdown-meta">
-                                                {entry.count} {entry.count === 1 ? 'entry' : 'entries'}
-                                            </span>
-                                        </div>
-
-                                        <div className="breakdown-amount-group">
-                                            <span className="breakdown-amount">{formatKES(entry.amount)}</span>
-                                            <span className="breakdown-share">
-                                                {entry.percentageOfIncome.toFixed(1)}% of income
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="breakdown-bar-track">
-                                        <div
-                                            className="breakdown-bar"
-                                            style={{ width: `${Math.min(entry.percentageOfExpenses, 100)}%` }}
-                                        />
-                                    </div>
-
-                                    <div className="breakdown-details">
-                                        <span>{entry.percentageOfExpenses.toFixed(1)}% of monthly expenses</span>
-                                        <span>{entry.percentageOfIncome.toFixed(1)}% of monthly income</span>
-                                    </div>
+                        <div className="category-chart-layout">
+                            <div
+                                className="category-donut"
+                                role="img"
+                                aria-label={`Expense distribution by category. Total expenses ${formatKES(totalExpenses)}.`}
+                                style={{
+                                    '--category-chart': `conic-gradient(${categoryChartGradient})`
+                                }}
+                            >
+                                <div className="category-donut-center">
+                                    <span>Total spent</span>
+                                    <strong>{formatKES(totalExpenses)}</strong>
                                 </div>
-                            ))}
+                            </div>
+
+                            <div className="category-legend">
+                                {expenseBreakdown.map((entry, index) => (
+                                    <div className="category-legend-item" key={entry.category}>
+                                        <span
+                                            className="category-swatch"
+                                            style={{ backgroundColor: categoryChartColors[index % categoryChartColors.length] }}
+                                        />
+                                        <div className="category-legend-label">
+                                            <strong>{entry.category}</strong>
+                                            <small>
+                                                {entry.count} {entry.count === 1 ? 'entry' : 'entries'}
+                                                {' · '}{entry.percentageOfIncome.toFixed(1)}% of income
+                                            </small>
+                                        </div>
+                                        <div className="category-legend-value">
+                                            <strong>{formatKES(entry.amount)}</strong>
+                                            <small>{entry.percentageOfExpenses.toFixed(1)}%</small>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>

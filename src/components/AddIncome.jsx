@@ -2,22 +2,23 @@ import {useState} from "react";
 import { Link ,useNavigate} from "react-router-dom";
 import '../App.css';
 
-export default function AddIncome({incomes,setIncomes}) {
+export default function AddIncome({setIncomes}) {
     const [amount,setAmount]=useState("");
     const [source,setSource]=useState("Salary");
     const [note,setNote]=useState("");
+    const [message,setMessage]=useState("");
     const navigate =useNavigate();
 
-    function handleSubmit (e){
+    function handleSubmit (e, returnToDashboard = false){
         e.preventDefault ();
 
         if (!amount || Number(amount) <= 0) {
-            alert("Please enter a valid amount");
+            setMessage("Enter an amount greater than zero.");
             return;
         }
 
-        setIncomes([
-            ...incomes,
+        setIncomes((currentIncomes) => [
+            ...currentIncomes,
             {
                 id:Date.now (),
                 amount:Number(amount),
@@ -26,7 +27,15 @@ export default function AddIncome({incomes,setIncomes}) {
                 date:new Date().toISOString(),
             }
         ]);
-        navigate("/");
+
+        if (returnToDashboard) {
+            navigate("/");
+            return;
+        }
+
+        setAmount("");
+        setNote("");
+        setMessage("Income saved. Add another entry or finish back to your dashboard.");
     }
     return (
         <div>
@@ -38,7 +47,7 @@ export default function AddIncome({incomes,setIncomes}) {
 
             <div className="container">
                 <div className="form-container">
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={(e) => handleSubmit(e)}>
                         <div className="form-group">
                             <label htmlFor="amount">Income Amount (KES)</label>
                             <input 
@@ -79,7 +88,18 @@ export default function AddIncome({incomes,setIncomes}) {
                             />
                         </div>
 
-                        <button type="submit" className="btn-success">Save Income</button>
+                        {message && <p className="form-message" role="status">{message}</p>}
+
+                        <div className="form-actions">
+                            <button type="submit" className="btn-success">Save &amp; add another</button>
+                            <button
+                                type="button"
+                                className="btn-secondary"
+                                onClick={(e) => handleSubmit(e, true)}
+                            >
+                                Save &amp; finish
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
